@@ -1,0 +1,156 @@
+// Dice Game By Alex Jimenez
+import java.io.File;
+import java.io.IOException;
+import java.util.Scanner;
+import java.util.Random;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+
+/**
+ * This is a basic dice game written in Java.
+ * A simple menu to either play, show results, or quit is displayed.
+ * Current gameplay averages and overall averages are displayed through file operations.
+ * @author Alex Jimenez
+ */
+public class DiceGame {
+    public static void main(String[] args) throws IOException {
+        System.out.println("Welcome to the Dice Rolling Game!");
+        int choice_Number = menu();
+        boolean quit = false;
+        do {
+            switch (choice_Number) {
+                case 1:
+                    int wins = 0;
+                    double rounds = 1.00;
+                    wins += Gameplay(wins);
+                    String yes_no = anotherRound();
+                    while (yes_no.equals("y")) {
+                        rounds += 1;
+                        wins += Gameplay(wins);
+                        yes_no = anotherRound();
+                    }
+                    fileWriting(wins, rounds);
+                    break;
+                case 2:
+                    DisplayFileAverage();
+                    break;
+                default:
+                    quit = true;
+                    break;
+            }
+            choice_Number = menu();
+        } while (quit);
+    }
+    /**
+     * Function creates the user menu with three options for users to pick from.
+     * Input validation makes sure 1-3 is entered.
+     * @return a number 1-3
+     */
+    public static int menu() {
+        System.out.println("\nPick one choice: \n1. Play Game \n2. Display Average Score \n3. Exit");
+        int choice;
+        Scanner keyboard = new Scanner(System.in);
+        System.out.print("Enter your choice (1-3): ");
+        choice = keyboard.nextInt();
+        while (choice < 1 || choice > 3) {
+            System.out.print("Invalid, please pick 1, 2, or 3: ");
+            choice = keyboard.nextInt();
+        }
+        return choice;
+    }
+    /**
+     * Function gets user input to guess the dice roll.
+     * Keyboard receives the users dice # guess.
+     * @return a number 1-6
+     */
+    public static int usersGuess() {
+        int dice_guess;
+        Scanner keyboard = new Scanner(System.in);
+        System.out.print("Guess the dice roll (1-6): ");
+        dice_guess = keyboard.nextInt();
+        while (dice_guess < 1 || dice_guess > 6) {
+            System.out.print("Invalid, please pick a number 1-6: ");
+            dice_guess = keyboard.nextInt();
+        }
+        return dice_guess;
+    }
+    /**
+     * Function generate a random dice roll 1-6 then prints it in a message.
+     * @return a number 1-6
+     */
+    public static int roll_dice() {
+        Random rand = new Random();
+        int value = rand.nextInt(6);
+        int dice_number = value + 1;
+        System.out.println("The die rolled a " + dice_number);
+        return(dice_number);
+    }
+    /**
+     * Function gets user input to determine is another round is played.
+     * Uses input validation to make sure y or n is entered.
+     * @return the string y or the string n
+     */
+    public static String anotherRound() {
+        String yes_no;
+        Scanner keyboard = new Scanner(System.in);
+        System.out.print("Play another round? (y/n): ");
+        yes_no = keyboard.nextLine();
+        while (!(yes_no.equals("y") || yes_no.equals("n"))) {
+            System.out.print("Invalid input, enter y (yes) or n (no): ");
+            yes_no = keyboard.nextLine();
+        }
+        return yes_no;
+    }
+    /**
+     * Function calls methods to test if the users dice # guess was correct.
+     * @param wins is passed to continue accumulating user wins
+     * @return users updated number of wins
+     */
+    public static int Gameplay(int wins) {
+        int dice_guess = usersGuess();
+        int dice_number = roll_dice();
+        if (dice_guess == dice_number) {
+            System.out.println("Congratulations! Your guess was correct.");
+            wins += 1;
+        }
+        else {
+            System.out.println("Sorry, your guess was incorrect.");
+        }
+        return wins;
+    }
+    /**
+     * Function appends the users current win percentage to count.txt.
+     * Prints current win ratio, # of rounds, and # of wins.
+     * @param wins and rounds are used to calculate percentages and decimals
+     */
+    public static void fileWriting(int wins, double rounds) throws IOException {
+        FileWriter file = new FileWriter("count.txt", true);
+        PrintWriter outfile = new PrintWriter(file);
+        outfile.printf("\n%.2f",wins/rounds);
+        outfile.close();
+        System.out.printf("\n# of rounds played is: " + "%.0f",rounds);
+        System.out.println("Correct guesses is: " + wins);
+        System.out.printf("\nPercentage of correct guesses is: " + "%.2f",(wins/rounds)*100);
+        System.out.print("%");
+    }
+    /**
+     * Function reads all game averages from a file and calculates an overall average.
+     * This overall average is rounded 2 decimal places and printed for the user.
+     */
+    public static void DisplayFileAverage() throws IOException {
+        File file = new File("count.txt");
+        Scanner infile = new Scanner(file);
+        double sum = 0.00;
+        double percent;
+        int count = 0;
+        while (infile.hasNext()) {
+            percent = infile.nextDouble();
+            count++;
+            sum += percent;
+        }
+        double average = (sum / count) * 100;
+        System.out.printf("\nYour average score is " + "%.2f",average);
+        System.out.print("%");
+        infile.close();
+    }
+}
